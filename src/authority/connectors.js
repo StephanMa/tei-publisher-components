@@ -4,6 +4,8 @@ import { Airtable } from './airtable.js';
 import { GND } from './gnd.js';
 import { KBGA } from './kbga.js';
 import { Custom } from './custom.js';
+/* added authority */
+import { NAMPI } from './nampi.js';
 
 export function createConnectors(endpoint, root) {
   const authorities = [];
@@ -25,6 +27,9 @@ export function createConnectors(endpoint, root) {
         break;
       case 'Custom':
         instance = new Custom(endpoint, configElem);
+        break;
+      case 'NAMPI':
+        instance = new NAMPI(configElem);
         break;
       default:
         instance = new Metagrid(configElem);
