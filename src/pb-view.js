@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit-element';
 import anime from 'animejs';
-import { pbMixin } from './pb-mixin.js';
+import { pbMixin } from "./pb-mixin.js";
 import { translate } from "./pb-i18n.js";
 import { typesetMath } from "./pb-formula.js";
 import '@polymer/iron-ajax';
@@ -172,8 +172,9 @@ export class PbView extends pbMixin(LitElement) {
             /**
             * Should matches be highlighted if a search has been executed?
             */
-            highlight: {
+            suppressHighlight: {
                 type: Boolean,
+                attribute: 'suppress-highlight',
                 reflect: true
             },
             /**
@@ -307,6 +308,7 @@ export class PbView extends pbMixin(LitElement) {
         this.notFound = "the server did not return any content";
         this.animation = false;
         this.direction = 'ltr';
+        this.suppressHighlight = false;
         this.highlight = false;
         this.infiniteScrollMax = 10;
         this.disableHistory = false;
@@ -393,6 +395,8 @@ export class PbView extends pbMixin(LitElement) {
     }
 
     firstUpdated() {
+        super.firstUpdated();
+        this.enableScrollbar(true);
         if (this.infiniteScroll) {
             this._topObserver = this.shadowRoot.getElementById('top-observer');
             this._bottomObserver = this.shadowRoot.getElementById('bottom-observer');
@@ -479,6 +483,14 @@ export class PbView extends pbMixin(LitElement) {
                     easing: 'linear'
                 });
             }
+        }
+    }
+
+    enableScrollbar(enable) {
+        if (enable) {
+            this.classList.add('noscroll');
+        } else {
+            this.classList.remove('noscroll');
         }
     }
 
@@ -662,7 +674,6 @@ export class PbView extends pbMixin(LitElement) {
                 position: this.nodeId
             };
             this.emitTo('pb-update', eventOptions);
-
             this._scroll();
         });
 
@@ -879,7 +890,7 @@ export class PbView extends pbMixin(LitElement) {
         if (this.xmlId) {
             params.id = this.xmlId;
         }
-        if (this.highlight) {
+        if (!this.suppressHighlight && this.highlight) {
             params.highlight = "yes";
         }
         if (this.map) {
@@ -1095,13 +1106,20 @@ export class PbView extends pbMixin(LitElement) {
             :host {
                 display: block;
                 background: transparent;
+            }
+
+            :host(.noscroll) {
                 scrollbar-width: none; /* Firefox 64 */
                 -ms-overflow-style: none;
             }
 
-            :host::-webkit-scrollbar { 
+            :host(.noscroll)::-webkit-scrollbar { 
                 width: 0 !important;
                 display: none; 
+            }
+
+            #view {
+                position: relative;
             }
 
             .columns {
@@ -1191,40 +1209,42 @@ export class PbView extends pbMixin(LitElement) {
     }
 
     render() {
-        return html`
-            <div id="view" part="content">
-                ${this._style}
-                ${this.infiniteScroll ? html`<div id="top-observer" class="observer"></div>` : null}
-                <div class="columns">
-                    <div id="column1">${this._column1}</div>
-                    <div id="column2">${this._column2}</div>
+        return [
+            html`
+                <div id="view" part="content">
+                    ${this._style}
+                    ${this.infiniteScroll ? html`<div id="top-observer" class="observer"></div>` : null}
+                    <div class="columns">
+                        <div id="column1">${this._column1}</div>
+                        <div id="column2">${this._column2}</div>
+                    </div>
+                    <div id="content">${this._content}</div>
+                    ${
+                this.infiniteScroll ?
+                    html`<div id="bottom-observer" class="observer"></div>` :
+                    null
+                }
+                    <div id="footnotes" part="footnotes">${this._footnotes}</div>
                 </div>
-                <div id="content">${this._content}</div>
-                ${
-            this.infiniteScroll ?
-                html`<div id="bottom-observer" class="observer"></div>` :
-                null
-            }
-                <div id="footnotes" part="footnotes">${this._footnotes}</div>
-            </div>
-            <paper-dialog id="errorDialog">
-                <h2>${translate('dialogs.error')}</h2>
-                <paper-dialog-scrollable></paper-dialog-scrollable>
-                <div class="buttons">
-                    <paper-button dialog-confirm="dialog-confirm" autofocus="autofocus">
-                    ${translate('dialogs.close')}
-                    </paper-button>
-                </div>
-            </paper-dialog>
-            <iron-ajax
-                id="loadContent"
-                verbose
-                handle-as="json"
-                method="get"
-                with-credentials
-                @response="${this._handleContent}"
-                @error="${this._handleError}"></iron-ajax>
-      `;
+                <paper-dialog id="errorDialog">
+                    <h2>${translate('dialogs.error')}</h2>
+                    <paper-dialog-scrollable></paper-dialog-scrollable>
+                    <div class="buttons">
+                        <paper-button dialog-confirm="dialog-confirm" autofocus="autofocus">
+                        ${translate('dialogs.close')}
+                        </paper-button>
+                    </div>
+                </paper-dialog>
+                <iron-ajax
+                    id="loadContent"
+                    verbose
+                    handle-as="json"
+                    method="get"
+                    with-credentials
+                    @response="${this._handleContent}"
+                    @error="${this._handleError}"></iron-ajax>
+            `
+        ]
     }
 }
 
