@@ -30,7 +30,8 @@
     "clean": "rimraf dist lib css images/leaflet images/openseadragon demo/build",
     "prepare": "npm run docs && npm run build:production",
     "codemirror": "rollup -c codemirror.rollup.config.js",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "rimraf": "./node_modules/rimraf/bin.js"
   },
   "author": "Wolfgang Meier",
   "license": "GPL-3.0-or-later",
@@ -44,8 +45,8 @@
     "@polymer/iron-behaviors": "^3.0.1",
     "@polymer/iron-collapse": "^3.0.1",
     "@polymer/iron-flex-layout": "^3.0.1",
-    "@polymer/iron-form-element-behavior": "^3.0.1",
     "@polymer/iron-form": "^3.0.1",
+    "@polymer/iron-form-element-behavior": "^3.0.1",
     "@polymer/iron-icon": "^3.0.1",
     "@polymer/iron-icons": "^3.0.1",
     "@polymer/iron-iconset": "^3.0.1",
@@ -102,6 +103,10 @@
     "@open-wc/prettier-config": "^1.1.0",
     "@open-wc/testing": "^2.5.29",
     "@open-wc/testing-karma": "^4.0.8",
+    "@polymer/iron-component-page": "*",
+    "@polymer/iron-demo-helpers": "*",
+    "@polymer/iron-test-helpers": "*",
+    "@polymer/test-fixture": "*",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
     "@rollup/plugin-replace": "^2.3.3",
@@ -112,6 +117,7 @@
     "eslint": "^7.10.0",
     "karma": "^5.2.3",
     "lint-staged": "^10.4.0",
+    "polymer-cli": "^1.7.1",
     "rimraf": "^3.0.2",
     "rollup": "^1.21.0",
     "rollup-plugin-analyzer": "^3.2.3",
@@ -120,13 +126,8 @@
     "rollup-plugin-modify": "^3.0.0",
     "rollup-plugin-terser": "^5.3.0",
     "semantic-release": "^17.1.1",
-    "web-component-analyzer": "^1.1.6,
-    "@polymer/iron-component-page": "^3.0.1",
-    "@polymer/iron-demo-helpers": "^3.0.1",
-    "@polymer/test-fixture": "^3.0.1",
-    "@polymer/iron-test-helpers": "^3.0.1",
-    "polymer-cli": "^1.7.1",
-    "wct-browser-legacy": "^1.0.1"
+    "wct-browser-legacy": "^1.0.1",
+    "web-component-analyzer": "^1.1.6"
   },
   "eslintConfig": {
     "extends": [
