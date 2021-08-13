@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  webcomponent:
+    build: .
+    container_name: webcomponent
+
+    volumes:
+      - npm-storage:/var/www/html
+    networks:
+      - www
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.npm.entrypoints=http
+      - traefik.http.routers.npm.rule=Host(`npm.stephan-makowski.de`)
+      #- traefik.http.middlewares.hp-auth.basicauth.users=stephan:$$2y$$05$$cLm0KXW.GYh1evaHtv.oUOSV9.nO6lvUSpbUUtM2BkBoeYkjfmp66
+      - traefik.http.middlewares.npm-https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.npm.middlewares=hp-https-redirect
+      - traefik.http.routers.npm-secure.entrypoints=https
+      - traefik.http.routers.npm-secure.rule=Host(`npm.stephan-makowski.de`)
+#      - traefik.http.routers.hp-secure.middlewares=traefik-auth
+      - traefik.http.routers.npm-secure.tls=true
+      - traefik.http.routers.npm-secure.tls.certresolver=http
+volumes:
+  npm-storage: {}
+networks:
+  www:
+    external:
+      name: ${TRAEFIK_NETWORK:-www}
