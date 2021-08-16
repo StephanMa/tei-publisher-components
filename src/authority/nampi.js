@@ -191,15 +191,67 @@ export class NAMPI extends Registry {
 
   infoPerson(json) {
     const professions = json.professionOrOccuption ? json.professionOrOccupation.map((prof) => prof.label) : [];
-    return `<p>${json.is_born_in[0].has_date_time} - ${json.dies_in[0].takes_place_on.has_date_time}</p>
+    const dates = [];
+
+    var dB, dBe, dBl;
+  
+    var dD;
+    if(json.is_born_in) {   
+      if( json.is_born_in.has_date_time) {
+        dates.push("* ")
+        dB = (new Date(json.is_born_in.has_date_time) + '').split(' ');
+        dB[2] = dB[2] + ',';
+        dates.push([dB[0], dB[1], dB[2], dB[3]].join(' '));
+      }
+
+      if( json.is_born_in.takes_place_not_earlier_than) {
+        dBe = (new Date(json.is_born_in.takes_place_not_earlier_than.has_date_time) + '').split(' ');
+        dBe[2] = dBe[2] + ',';
+        dates.push([dBe[0], dBe[1], dBe[2], dBe[3]].join(' '));
+      }
+
+      if( json.is_born_in.takes_place_not_later_than) {
+        dBl = (new Date(json.is_born_in.takes_place_not_later_than.has_date_time) + '').split(' ');
+        dBl[2] = dBl[2] + ',';
+        dates.push([dBl[0], dBl[1], dBl[2], dBl[3]].join(' '));
+      }
+    }
+
+    if(json.dies_in) { 
+      if(json.dies_in.takes_place_on) {
+        if(json.dies_in.takes_place_on.has_date_time) {
+          dates.push(' - ✞');
+          dD = (new Date(json.dies_in.takes_place_on.has_date_time) + '').split(' ');
+          dD[2] = dD[2] + ',';
+          dates.push([dD[0], dD[1], dD[2], dD[3]].join(' '));
+        }
+      }
+    }
+
+    var datumString;
+    if (dates.length > 0) {
+      datumString =  `${dates.join('')}${professions ? `; ${professions}` : ''}`;
+    } else {
+      datumString = "no Date available";
+    }
+    return 
+      `<p>${datumString}</p>
       <p>${professions.join(' ')}</p>`;
   }
 
   infoPlace(json) {
     if (json.same_as) {
-      const terms = json.same_as.map((term) => term);
-      return `<p>${terms.join(', ')}</p>`;
-    }
+      var terms = json.same_as;
+      var output;
+      terms = Array.isArray(terms) ? terms : [terms];
+      if(terms.length > 1) {
+      output = terms.join(", ");
+     } else {
+       output = terms;
+     }
+
+    `<p>${output}</p>`;
     return '';
+  }
   }
 }
