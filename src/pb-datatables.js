@@ -15,7 +15,7 @@ import './datatable-icons.js';
 import { CollectionHelpers } from './src/collectionHelpers.js';
 'use scrict';
 
-class PaperDatatable extends mixinBehaviors([IronScrollTargetBehavior, IronResizableBehavior], PolymerElement) {
+class PaperDatatable extends  pbMixin(mixinBehaviors([IronScrollTargetBehavior, IronResizableBehavior], PolymerElement)) {
 	static get template() {
 		return html`
 			<style>
@@ -570,7 +570,19 @@ class PaperDatatable extends mixinBehaviors([IronScrollTargetBehavior, IronResiz
 			},
 			_theadDistanseToTop: {
 				type: Number
-			}
+			},
+            /**
+             * If set, trigger a `pb-show-annotation` event as soon as the element is initialized.
+             * Use this to make `pb-facsimile` or `pb-svg` switch to the given image/coordinates upon
+             * load.
+             */
+            emitOnLoad: {
+                type: Boolean,
+                attribute: 'emit-on-load'
+            },
+            event: {
+                type: String
+            }
 		}
 	}
 
@@ -585,6 +597,49 @@ class PaperDatatable extends mixinBehaviors([IronScrollTargetBehavior, IronResiz
 			'_setPartialSelection(selectedKeys.splices, data.*)'
 		]
 	}
+    
+      connectedCallback() {
+        super.connectedCallback();
+        this.subscribeTo(this.event, (ev) => {
+            if (this.history && ev.detail && ev.detail.params) {
+                const start = ev.detail.params.start;
+                if (start) {
+                    this.setParameter('start', start);
+                    this.pushHistory('pagination', {
+                        start: start
+                    });
+                }
+            }
+            PbLoad.waitOnce('pb-page-ready', () => {
+                this.load(ev);
+            });
+        });
+
+        if (this.history) {
+            window.addEventListener('popstate', (ev) => {
+                ev.preventDefault();
+                if (ev.state && ev.state.start && ev.state.start !== this.start) {
+                    this.start = ev.state.start;
+                    this.load();
+                }
+            });
+        }
+
+        this.subscribeTo('pb-toggle', ev => {
+            this.toggleFeature(ev);
+        });
+
+        this.subscribeTo('pb-i18n-update', ev => {
+            const needsRefresh = this.language && this.language !== ev.detail.language;
+            this.language = ev.detail.language;
+            if (this.useLanguage && needsRefresh) {
+                this.load();
+            }
+        }, []);
+
+        this.signalReady();
+    }
+    
 	// ADDDD
 	// listeners: {
 	// 	'container.scroll': '_triggerDialogResize',
